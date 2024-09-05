@@ -67,7 +67,7 @@ if __name__ == "__main__":
     pos_hist, vel_hist, pe_hist, ke_hist = [init_pos], [init_vel], [], []
 
     for t in time:
-        force_t, _ = calc_total_force(vel, drag_const)
+        force_t, _ = calc_total_force(vel)
         pos, vel = calc_changes(pos, vel, force_t, t)
         pe, ke = calc_energy(pos, vel,)
 
