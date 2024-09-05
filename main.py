@@ -51,12 +51,12 @@ def calc_energy(pos, vel):
 
 
 if __name__ == "__main__":
-    ## Define Global Variables
+    ## Define Global Variables, all units are in SI units
     g = 9.8
-    mass = 10
+    mass = 1000
     drag_const = 0.01
     ## Create time array
-    time = np.arange(0, 10, 0.001)
+    time = np.arange(0, 10, 0.00001)
     ## Create init parameters
     init_pos = np.array([0, 10])
     init_vel = np.array([0, 0])
