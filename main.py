@@ -118,7 +118,7 @@ plt.plot(pos_hist[:,1][:count - 1], pe_hist[:count - 1], 'o', label = "Potential
 #plt.plot(pos_hist[:,0][:count - 1], ke_hist[:,0][:count - 1], 'o', label = "Kinetic Energy - X")
 plt.plot(pos_hist[:,1][:count - 1], ke_hist[:,1][:count - 1], 'o', label = "Kinetic Energy - Y")
 plt.legend()
-plt.title("Energy vs Time")
+plt.title("Energy vs Distance")
 plt.ylabel("Energy")
 plt.xlabel("Distance")
 plt.show()
