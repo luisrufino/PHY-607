@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import pylab as plt
-import pandas as pd
+
 
 def calc_changes(pos, vel, force, time_step):
     """
@@ -13,6 +13,9 @@ def calc_changes(pos, vel, force, time_step):
     :param time_step: Time step for the update
     :return: Updated position and velocity
     """
+    pos = np.array(pos)
+    vel = np.array(vel)
+    force = np.array(force)
     pos_final = pos + vel * time_step + 0.5 * force * time_step ** 2
     vel_final = vel + force * time_step
     return pos_final, vel_final
@@ -34,6 +37,8 @@ def calc_total_force(vel):
     force_drag = (drag_const/mass) * vel ** 2
     if vel[0] > 0:
         force_drag[0] = -force_drag[0]
+    # if vel[1] > 0:
+    #
     total_force = force_grav + force_drag
     force_mag = np.linalg.norm(total_force)
     return total_force, force_mag
@@ -50,6 +55,8 @@ def calc_energy(pos, vel):
     :param g: Gravitational constant
     :return: Potential energy, Kinetic energy
     """
+    pos = np.array(pos)
+    vel = np.array(vel)
     pe = g * mass * pos[1]  # Using only vertical displacement for PE
     ke = 0.5 * mass * vel ** 2
     return pe, ke
@@ -59,18 +66,19 @@ if __name__ == "__main__":
     ## Define Global Variables, all units are in SI units
     g = 9.8
     mass = 1000
-    drag_const = 0.01
+    drag_const = 0.30
     ## Create time array
-    time = np.arange(0, 10, 0.00001)
+    time = np.arange(0, 1, 0.001)
     ## Create init parameters
-    init_pos = np.array([0, 10])
-    init_vel = np.array([0, 0])
+    init_pos = np.array([0, 1000])
+    init_vel = np.array([10, 10])
     ## pos and vel containg the changes in the position and velocity
     pos = init_pos
     vel = init_vel
 
     pos_hist, vel_hist, pe_hist, ke_hist = [init_pos], [init_vel], [], []
-
+    time_hist = []
+    count = 0
     for t in time:
         force_t, _ = calc_total_force(vel)
         pos, vel = calc_changes(pos, vel, force_t, t)
@@ -81,6 +89,8 @@ if __name__ == "__main__":
         pe_hist.append(pe)
         ke_hist.append(ke)
 
+        count += 1
+        time_hist.append(t)
         print(f"At time step: {t}\n"
               f"Total force: {force_t}\n"
               f"Position: {pos}, Velocity: {vel}\n"
@@ -89,8 +99,26 @@ if __name__ == "__main__":
 
         if pos[1] < 0:  # Cow hits the floor
             print(f"Cow passed the floor at time {t}. Simulation ends.")
-            print(f"Final velocity: {vel_hist[-2]}")
+            print(f"Final velocity: {vel_hist[count - 1]}")
             break
 
-## Plot history of changes of position and velocity
+## Plot the potential energy and kinetic energy over time
+ke_hist = np.array(ke_hist)
+plt.plot(time_hist[:count - 1], pe_hist[:count - 1], 'o', label = "Potential Energy")
+plt.plot(time_hist[:count - 1], ke_hist[:,0][:count - 1], 'o', label = "Kinetic Energy - X")
+plt.plot(time_hist[:count - 1], ke_hist[:,1][:count - 1], 'o', label = "Kinetic Energy - Y")
+plt.legend()
+plt.title("Energy vs Time")
+plt.ylabel("Energy")
+plt.xlabel("Time")
+plt.show()
 
+pos_hist = np.array(pos_hist)
+plt.plot(pos_hist[:,1][:count - 1], pe_hist[:count - 1], 'o', label = "Potential Energy")
+#plt.plot(pos_hist[:,0][:count - 1], ke_hist[:,0][:count - 1], 'o', label = "Kinetic Energy - X")
+plt.plot(pos_hist[:,1][:count - 1], ke_hist[:,1][:count - 1], 'o', label = "Kinetic Energy - Y")
+plt.legend()
+plt.title("Energy vs Time")
+plt.ylabel("Energy")
+plt.xlabel("Distance")
+plt.show()
