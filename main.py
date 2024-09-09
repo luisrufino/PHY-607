@@ -2,7 +2,6 @@ import numpy as np
 import scipy as sp
 import pylab as plt
 import pandas as pd
-import matplotlib.pyplot as plt2
 
 def calc_changes(pos, vel, force, time_step):
     """
@@ -28,8 +27,13 @@ def calc_total_force(vel):
     :param drag_const: Drag coefficient
     :return: Total force vector and its magnitude
     """
+    vel = np.array(vel)
     force_grav = np.array([0, -g])
-    force_drag = drag_const * vel ** 2
+
+    ## Drag should always be aposing the motion of the object
+    force_drag = (drag_const/mass) * vel ** 2
+    if vel[0] > 0:
+        force_drag[0] = -force_drag[0]
     total_force = force_grav + force_drag
     force_mag = np.linalg.norm(total_force)
     return total_force, force_mag
@@ -46,7 +50,7 @@ def calc_energy(pos, vel):
     :param g: Gravitational constant
     :return: Potential energy, Kinetic energy
     """
-    pe = g * mass * pos  # Using only vertical displacement for PE
+    pe = g * mass * pos[1]  # Using only vertical displacement for PE
     ke = 0.5 * mass * vel ** 2
     return pe, ke
 
