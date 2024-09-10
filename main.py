@@ -2,6 +2,12 @@ import numpy as np
 import scipy as sp
 import pylab as plt
 
+def change_sign(tmp, tmp1):
+    if tmp > 0:
+        return -1 * abs(tmp1) ## Makes it negative
+    if tmp < 0:
+        return abs(tmp1) ## Makes it positive
+
 
 def calc_changes(pos, vel, force, time_step):
     """
@@ -36,9 +42,17 @@ def calc_total_force(vel):
     ## Drag should always be aposing the motion of the object
     force_drag = (drag_const/mass) * vel ** 2
     if vel[0] > 0:
-        force_drag[0] = -force_drag[0]
-    # if vel[1] > 0:
-    #
+        force_drag[0] = change_sign(vel[0], force_drag[0])
+    else:
+        force_drag[0] = change_sign(vel[0],force_drag[0])
+    if vel[1] > 0:
+        force_drag[1] = change_sign(vel[1], force_drag[1])
+        print(f"Positive velocity in y")
+        print(force_drag[1])
+    else:
+        force_drag[1] = change_sign(vel[1], force_drag[1])
+        print(f"Negative velocity in y")
+        print(force_drag[1])
     total_force = force_grav + force_drag
     force_mag = np.linalg.norm(total_force)
     return total_force, force_mag
@@ -66,12 +80,12 @@ if __name__ == "__main__":
     ## Define Global Variables, all units are in SI units
     g = 9.8
     mass = 1000
-    drag_const = 0.30
+    drag_const = 0.0
     ## Create time array
     time = np.arange(0, 1, 0.001)
     ## Create init parameters
     init_pos = np.array([0, 1000])
-    init_vel = np.array([10, 10])
+    init_vel = np.array([1, 100])
     ## pos and vel containg the changes in the position and velocity
     pos = init_pos
     vel = init_vel
