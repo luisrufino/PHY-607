@@ -43,16 +43,17 @@ def calc_total_force(vel):
     force_drag = (drag_const/mass) * vel ** 2
     if vel[0] > 0:
         force_drag[0] = change_sign(vel[0], force_drag[0])
+        # print(f"Positive velocity in x: {vel[0]}")
+        # print(force_drag[1])
     else:
         force_drag[0] = change_sign(vel[0],force_drag[0])
+        # print(f"Negative velocity in x: {vel[0]}")
+        # print(force_drag[1])
     if vel[1] > 0:
         force_drag[1] = change_sign(vel[1], force_drag[1])
-        print(f"Positive velocity in y")
-        print(force_drag[1])
     else:
         force_drag[1] = change_sign(vel[1], force_drag[1])
-        print(f"Negative velocity in y")
-        print(force_drag[1])
+
     total_force = force_grav + force_drag
     force_mag = np.linalg.norm(total_force)
     return total_force, force_mag
@@ -116,8 +117,22 @@ if __name__ == "__main__":
             print(f"Final velocity: {vel_hist[count - 1]}")
             break
 
-## Plot the potential energy and kinetic energy over time
+## Writing time, px, py to a file
+pos_hist = np.array(pos_hist)
 ke_hist = np.array(ke_hist)
+time_hist = np.array(time_hist)
+
+
+with open('data.txt', 'w') as f:
+    for i in range(len(time_hist)):
+        time = time_hist[i]
+        x = pos_hist[:,0][i]
+        y = pos_hist[:,1][i]
+        stuff = f"{time:.4f}, {x}, {y}\n"
+        f.write(stuff)
+
+## Plot the potential energy and kinetic energy over time
+
 plt.plot(time_hist[:count - 1], pe_hist[:count - 1], 'o', label = "Potential Energy")
 plt.plot(time_hist[:count - 1], ke_hist[:,0][:count - 1], 'o', label = "Kinetic Energy - X")
 plt.plot(time_hist[:count - 1], ke_hist[:,1][:count - 1], 'o', label = "Kinetic Energy - Y")
@@ -127,7 +142,7 @@ plt.ylabel("Energy")
 plt.xlabel("Time")
 plt.show()
 
-pos_hist = np.array(pos_hist)
+
 plt.plot(pos_hist[:,1][:count - 1], pe_hist[:count - 1], 'o', label = "Potential Energy")
 #plt.plot(pos_hist[:,0][:count - 1], ke_hist[:,0][:count - 1], 'o', label = "Kinetic Energy - X")
 plt.plot(pos_hist[:,1][:count - 1], ke_hist[:,1][:count - 1], 'o', label = "Kinetic Energy - Y")
@@ -136,3 +151,6 @@ plt.title("Energy vs Distance")
 plt.ylabel("Energy")
 plt.xlabel("Distance")
 plt.show()
+
+
+## Init conditions
