@@ -27,8 +27,13 @@ def calc_total_force(vel):
     :param drag_const: Drag coefficient
     :return: Total force vector and its magnitude
     """
+    vel = np.array(vel)
     force_grav = np.array([0, -g])
-    force_drag = drag_const * vel ** 2
+
+    ## Drag should always be aposing the motion of the object
+    force_drag = (drag_const/mass) * vel ** 2
+    if vel[0] > 0:
+        force_drag[0] = -force_drag[0]
     total_force = force_grav + force_drag
     force_mag = np.linalg.norm(total_force)
     return total_force, force_mag
@@ -45,7 +50,7 @@ def calc_energy(pos, vel):
     :param g: Gravitational constant
     :return: Potential energy, Kinetic energy
     """
-    pe = g * mass * pos  # Using only vertical displacement for PE
+    pe = g * mass * pos[1]  # Using only vertical displacement for PE
     ke = 0.5 * mass * vel ** 2
     return pe, ke
 
@@ -54,18 +59,19 @@ if __name__ == "__main__":
     ## Define Global Variables, all units are in SI units
     g = 9.8
     mass = 1000
-    drag_const = 0.01
+    drag_const = 0.11
     ## Create time array
-    time = np.arange(0, 10, 0.00001)
+    time = np.arange(0, 10, 0.001)
+    #print(time)
     ## Create init parameters
-    init_pos = np.array([0, 10])
-    init_vel = np.array([0, 0])
+    init_pos = np.array([0, 1000])
+    init_vel = np.array([20, 10])
     ## pos and vel containg the changes in the position and velocity
     pos = init_pos
     vel = init_vel
 
     pos_hist, vel_hist, pe_hist, ke_hist = [init_pos], [init_vel], [], []
-
+    time_s = []
     for t in time:
         force_t, _ = calc_total_force(vel)
         pos, vel = calc_changes(pos, vel, force_t, t)
@@ -81,7 +87,7 @@ if __name__ == "__main__":
               f"Position: {pos}, Velocity: {vel}\n"
               f"Potential energy: {pe}, Kinetic energy: {ke}\n"
               f"---------------------------------\n")
-
+        time_s.append(t)
         if pos[1] < 0:  # Cow hits the floor
             print(f"Cow passed the floor at time {t}. Simulation ends.")
             print(f"Final velocity: {vel_hist[-2]}")
