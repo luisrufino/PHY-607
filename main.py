@@ -95,6 +95,7 @@ if __name__ == "__main__":
 
     pos_hist, vel_hist, pe_hist, ke_hist = [init_pos], [init_vel], [], []
     time_hist = []
+    vel_yarr =[]
     count = 0
     for t in time:
         force_t, _ = calc_total_force(vel)
@@ -105,6 +106,8 @@ if __name__ == "__main__":
         vel_hist.append(vel)
         pe_hist.append(pe)
         ke_hist.append(ke)
+        vel_yarr.append(vel[1])
+
 
         count += 1
         time_hist.append(t)
@@ -152,6 +155,12 @@ plt.legend()
 plt.title("Energy vs Distance")
 plt.ylabel("Energy")
 plt.xlabel("Distance")
+plt.show()
+
+plt.plot(time_hist,vel_yarr, 'x')
+plt.title("Velocity vs Time")
+plt.ylabel("Velocity")
+plt.xlabel("Time")
 plt.show()
 
 
