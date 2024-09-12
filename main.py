@@ -79,6 +79,9 @@ def calc_energy(pos, vel):
     return pe, ke
 
 
+
+
+
 if __name__ == "__main__":
     ## Define Global Variables, all units are in SI units
     g = 9.8
@@ -95,7 +98,8 @@ if __name__ == "__main__":
 
     pos_hist, vel_hist, pe_hist, ke_hist = [init_pos], [init_vel], [], []
     time_hist = []
-    vel_yarr =[]
+    vel_yarr = []
+    vel_xarr = []
     count = 0
     for t in time:
         force_t, _ = calc_total_force(vel)
@@ -106,6 +110,7 @@ if __name__ == "__main__":
         vel_hist.append(vel)
         pe_hist.append(pe)
         ke_hist.append(ke)
+        vel_xarr.append(vel[0])
         vel_yarr.append(vel[1])
 
 
@@ -158,8 +163,22 @@ plt.xlabel("Distance")
 plt.show()
 
 plt.plot(time_hist,vel_yarr, 'x')
-plt.title("Velocity vs Time")
+plt.title("Velocity in Y vs Time")
 plt.ylabel("Velocity")
+plt.xlabel("Time")
+plt.show()
+
+
+plt.plot(time_hist,np.multiply(mass,vel_xarr), 'x')
+plt.title("Momentum in X vs Time")
+plt.ylabel("Momentum")
+plt.xlabel("Time")
+plt.show()
+
+
+plt.plot(time_hist,np.multiply(mass,vel_yarr), 'x')
+plt.title("Momentum in Y vs Time")
+plt.ylabel("Momentum")
 plt.xlabel("Time")
 plt.show()
 
