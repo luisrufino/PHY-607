@@ -79,12 +79,12 @@ if __name__ == "__main__":
         x_f = ps[i][:,0]
         v_f = ps[i][:,1]
         for t in range(1,len(time)):
-            x_f[t], v_f[t] = calc_forward(x_f[t-1], v_f[t-1], dt)
+            x_f[t], v_f[t] = explicit(x_f[t-1], v_f[t-1], dt)
 
     particles = np.array([s0, s1, s2, s3, s0])
     for i in range(len(time)):
         a = np.array([particles[p][i] for p in range(particles.shape[0])])
-        print(a)
+        #print(a)
 
         plt.plot(a[:, 0], a[:, 1], 'bo')  # Draw points
 
@@ -97,5 +97,3 @@ if __name__ == "__main__":
     plt.xlabel('Position')
     plt.ylabel('Momentum')
     plt.show()
-
-
