@@ -86,19 +86,18 @@ def simpsons_rule(f, a, b, N):
     float
         Approximate integral value using Simpson's rule.
     """
-    # Ensure N is even for Simpson's rule; if odd, increment by 1
+    # Ensure N is even for Simpson's rule
     if N % 2 == 1:
         N += 1
 
-    # Create N evenly spaced points between a and b
-    x = np.linspace(a, b, N)
+    # Create N+1 evenly spaced points between a and b
+    x = np.linspace(a, b, N + 1)  # N+1 points because Simpson's rule uses 3 points at a time
+    dx = (b - a) / N  # Subinterval width
 
-    # Calculate the width of each subinterval
-    dx = (b - a) / N
+    # Apply Simpson's rule: f(a) + 4*f(odd indices) + 2*f(even indices) + f(b)
+    integral = f(x[0]) + f(x[-1]) + 4 * np.sum(f(x[1:-1:2])) + 2 * np.sum(f(x[2:-1:2]))
 
-    # Apply Simpson's rule: alternating coefficients 4 and 2 are applied to
-    # odd and even points, respectively, except the first and last points.
-    return (dx / 3) * (f(a) + 4 * np.sum(f(x[1:-1:2])) + 2 * np.sum(f(x[2:-1:2])) + f(b))
+    return (dx / 3) * integral
 
 
 ## Compare with SciPy Quad
