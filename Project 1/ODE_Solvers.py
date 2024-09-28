@@ -104,7 +104,7 @@ def scipy_ode_solver(t, y0, k, m, b):
         return [dqdt, dpdt]
 
     # Solve the ODE system over the time interval [t[0], t[-1]]
-    sol = solve_ivp(damped_oscillator, [t[0], t[-1]], y0, t_eval=t, method = "BDF")
+    sol = solve_ivp(damped_oscillator, [t[0], t[-1]], y0, t_eval=t)
 
     # Return the arrays of positions (q) and momenta (p) from the solution
     return sol.y[0], sol.y[1]
