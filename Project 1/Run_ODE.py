@@ -45,7 +45,7 @@ def ext_critical(q0, v0, b, m, k, t):
 
 
 ## Plot for each damping scenario
-b_u = 0.1
+b_u = 0.01
 b_c = 2
 b_o = 10
 damping_cases = {
@@ -79,4 +79,45 @@ for label, case in damping_cases.items():
     # Save the plot for LaTeX
     plt.savefig(f"{label.replace(' ', '_').replace('=', '_')}.png")  # Save each plot as a PNG file
 
-    plt.show()
+## Plot for each damping scenario
+b_values = [0.01, 2, 10]  # Underdamped, critically damped, overdamped
+damping_labels = ['Underdamped', 'Critically Damped', 'Overdamped']
+methods = ['euler', 'rk4', 'scipy']  # List of numerical methods to compare
+
+# Prepare for plotting differences
+plt.figure(figsize=(15, 15))
+
+for idx, b in enumerate(b_values):
+    t_exact = np.linspace(0, 30, 1000)  # Time array for exact solution
+
+    # Select the appropriate exact solution function based on the damping case
+    if idx == 0:
+        exact_solution = ext_under(q0, v0, b, m, k, t_exact)
+    elif idx == 1:
+        exact_solution = ext_critical(q0, v0, b, m, k, t_exact)
+    elif idx == 2:
+        exact_solution = ext_over(q0, v0, b, m, k, t_exact)
+
+    # Loop through each numerical method to calculate and plot differences
+    for method in methods:
+        t = np.arange(0, 30, 0.1)  # Define a time array for numerical methods
+        q, _ = solve_oscillator(method, q0, p0, t, k, m, b)
+
+        # Interpolate exact solution for the current time points
+        exact_interp = np.interp(t, t_exact, exact_solution)  # Interpolating exact solution
+        difference = np.abs(q - exact_interp)  # Calculate absolute difference
+
+        # Plot the differences
+        plt.subplot(3, 1, idx + 1)
+        plt.plot(t, difference, label=f'{method} Difference')
+
+    # Customize the plot for the current damping case
+    plt.title(f'Difference Between Exact Solution and Numerical Methods - {damping_labels[idx]} Damping')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Absolute Difference')
+    plt.legend()
+    plt.grid()
+
+# Save the figure
+plt.savefig('damped_harmonic_oscillator_differences.png', dpi=300)  # Save the plot as a PNG file
+plt.close()
