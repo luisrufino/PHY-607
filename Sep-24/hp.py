@@ -57,13 +57,13 @@ if __name__ == '__main__':
     print(f"times: {x}")
 
     ## Testing the accuracy
-    num = beyond(4.32, 10)
-    num1 = beyond(1,-4)
+    num = beyond(4.32, 10) ## Using this number in the sum
+    num1 = beyond(1,-4) ## Using this number to sum over num 100 times
     num2 = beyond(1,2)
     a = num1.times(num2)
     final_res = num.add(a)
     print(f"Result before small increment: {final_res}")
     N = 100
     for i in range(N):
-        num1 = num1.add(num2)
-    print(f"Result after small increments: {num1}")
+        num = num.add(num2)
+    print(f"Result after small increments: {num}")
