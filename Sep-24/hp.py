@@ -1,9 +1,9 @@
 class beyond():
-    def init(self, num, exp):
+    def __init__(self, num, exp):
         self.num = num ## number for example 6.434E#, the 6.434 is the number, and should be converted to a interger
         self.exp = exp ## After the decimal. which is how percise I want the number ot be
 
-    def str(self):
+    def __str__(self):
         return f"{self.num}e{self.exp}"
     def add(self, other):
         if self.exp == other.exp: ## Makes sure the exponent is the same
@@ -38,7 +38,7 @@ class beyond():
         return beyond(res,a)
 
 
-if name == 'main':
+if __name__ == '__main__':
     x1 = beyond(2.29,4)
     x2 = beyond(1.59,10)
     x = x1.div(x2)
@@ -55,3 +55,15 @@ if name == 'main':
     x2 = beyond(1.59,10)
     x = x1.times(x2)
     print(f"times: {x}")
+
+    ## Testing the accuracy
+    num = beyond(4.32, 10)
+    num1 = beyond(1,-4)
+    num2 = beyond(1,2)
+    a = num1.times(num2)
+    final_res = num.add(a)
+    print(f"Result before small increment: {final_res}")
+    N = 100
+    for i in range(N):
+        num1 = num1.add(num2)
+    print(f"Result after small increments: {num1}")
