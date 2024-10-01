@@ -65,5 +65,5 @@ if __name__ == '__main__':
     print(f"Result before small increment: {final_res}")
     N = 100
     for i in range(N):
-        num = num.add(num2)
+        num = num.add(num1)
     print(f"Result after small increments: {num}")
