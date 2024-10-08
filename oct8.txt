@@ -1,0 +1,27 @@
+Members: Luis Ruffino, Julia Rice
+Project Concept: Simulating Brownian Motion with a 2d Random Walk
+Plan:
+	1)We will be simulating the Brownian motion of a single particle due to arbitrary kinetic energy of surrounding points (particles). 
+	  Our simulation will take place on a 2D lattice, and we'll be tracking the evolution of a single particle's trajectory. 
+	2)PseudoCode:
+		We'll use a class ("Simplex") to initalize the lattic structure upon which our trajectory will evolve.
+			We'll define 4 vertices as the corners of a "face," equivalent to 1 unit on the lattice.
+			We'll use a method to return the nearest neighbor lattice points relative to current position, on of which will then be randomly chosen as next point of
+			trajectory.
+			Within this class, we'll define another class that will designate an arbitrary kinetic energy (within a reasonable range) for each lattic point.
+			All particles will have equal mass.
+			A markov chain will be used to impliment the concept of forces between particles, with evolution based on a 2nd order ODE of particles position. 
+		We'll define another class ("Random Walk") that computes the simulation, the random walk of the particles trajectory
+	3)Division of work: 
+		Luis: Will work on Simplex class
+	 	Julia: Will work on Random walk class -> will be using Dijkstra's Algorithm 
+		*Each class will be contained in its own module*
+
+
+
+
+Key results: we'll be looking at the particle's final position relative to initial position, with varied initial kinetic energies on lattice. 
+We can measure how long it takes for the system to reach thermal equillibrium (avg KE evens out across lattice) by number of "steps" taken by designated particle. 
+
+Class1) Simplex (the lattic itself)
+Class2) Random Walk (Set of methods that executes the random walk)
