@@ -9,26 +9,29 @@ def rejection(target, proposal):
     while len(x_acpt) < 1000:
         ## First choose a random x
         x = np.random.uniform(0, 1)
-        u = np.random.uniform(0, 1)
+        u = np.random.uniform(0, proposal(x))
         ## Calculate the probability of accepting x
         accept_prob = target(x) / proposal(x)
         if accept_prob >= u:
             ## If the accept probability is greater than or equal to a random number between 0 and 1, accept x
-            accpet += 1
+            accept += 1
             x_acpt.append(x)
         else:
             reject += 1
-    a = f"accept reject ratio: {accept/reject}"
+    a = f"Number of accepted: {accept}, Number of rejected: {reject}"
+    r = 1 - reject/accept
     print(a)
+    print(f"ratio of rejection/accept: {r}")
+
     return a
 
-if __name__ == "__main":
+if __name__ == "__main__":
     print(f'hello world')
-    def p1(x, ):
+    def p1(x):
         return np.exp(x) / (np.exp(1) - 1)
 
 
-    def p2(x, ):
+    def p2(x):
         ## This is the line
         y_0 = p1(0) + 0.1
         return x + y_0
@@ -38,6 +41,7 @@ if __name__ == "__main":
         ## This is the x^2 thing
         y_0 = p1(0) + 0.1
         return x ** 2 + y_0
-
+    print(f'numbers for the line')
     a = rejection(p1, p2)
-    print("hello world")
+    print(f"\nnumbers for the x^2 function")
+    a = rejection(p1, p3)
