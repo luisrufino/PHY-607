@@ -1,4 +1,4 @@
-Members: Luis Ruffino, Julia Rice
+Members: Luis Rufino, Julia Rice
 Project Concept: Simulating Brownian Motion with a 2d Random Walk
 Plan:
 	1)We will be simulating the Brownian motion of a single particle due to arbitrary kinetic energy of surrounding points (particles). 
