@@ -38,6 +38,18 @@ def monte_carlo_ellipse_circumference(a, b, n_samples):
 
     return circumference_estimate
 
+def arc_length_ellipse(a, b, n_samples):
+    delta = 0.0001
+    x = np.random.uniform(-a, a, n_samples)
+    y = np.random.uniform(-b, b, n_samples)
+    plus_ellipse = (x/(a+delta))**2 + (y/(b+delta))**2 < 1
+    plus_area = a * b * 4 * np.mean(plus_ellipse)
+    minus_ellipse = (x/(a-delta))**2 + (y/(b-delta))**2 < 1
+    minus_area = a * b * 4 * np.mean(minus_ellipse)
+    ## Now compare the areas, and this should give me some length unit which is related to the arc length
+    ## Now compare
+    a = (plus_area - minus_area)/(2*delta)
+    return a
 ## This is the best aproximation to the arc length of an ellipse
 def approx(a, b):
     t = ((a-b)/(a+b))**2
@@ -49,24 +61,24 @@ a = 2  # Semi-major axis
 b = 5  # Semi-minor axis
 
 # 1. Inverse CDF Sampling
-inverse_samples = inverse_cdf_sampling(n_samples)
-plt.hist(inverse_samples, bins=50, density=True, label='Inverse CDF Samples', alpha=0.7)
-plt.title('Sampling from $e^x$ using Inverse CDF (0 to 1)')
-plt.xlabel('x')
-plt.ylabel('Density')
-plt.legend()
-plt.show()
-
-# 2. Rejection Sampling
-rejection_samples = rejection_sampling_exp(n_samples)
-plt.hist(rejection_samples, bins=50, density=True, label='Rejection Sampling', alpha=0.7)
-plt.title('Sampling from $e^x$ using Rejection Sampling (0 to 1)')
-plt.xlabel('x')
-plt.ylabel('Density')
-plt.legend()
-plt.show()
+# inverse_samples = inverse_cdf_sampling(n_samples)
+# plt.hist(inverse_samples, bins=50, density=True, label='Inverse CDF Samples', alpha=0.7)
+# plt.title('Sampling from $e^x$ using Inverse CDF (0 to 1)')
+# plt.xlabel('x')
+# plt.ylabel('Density')
+# plt.legend()
+# plt.show()
+#
+# # 2. Rejection Sampling
+# rejection_samples = rejection_sampling_exp(n_samples)
+# plt.hist(rejection_samples, bins=50, density=True, label='Rejection Sampling', alpha=0.7)
+# plt.title('Sampling from $e^x$ using Rejection Sampling (0 to 1)')
+# plt.xlabel('x')
+# plt.ylabel('Density')
+# plt.legend()
+# plt.show()
 
 # 3. Monte Carlo Integration for Ellipse Circumference
-circumference_estimate = monte_carlo_ellipse_circumference(a, b, n_samples)
+circumference_estimate = arc_length_ellipse(a, b, n_samples)
 print(f"Estimated Circumference of the Ellipse (a = {a}, b = {b}): {circumference_estimate}\n"
       f"Using Ramanujan aproximation of the circumference of the elipse: {approx(a,b)}")
