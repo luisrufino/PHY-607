@@ -7,7 +7,7 @@ def rejection(target, proposal):
     u_acpt = []
     reject = 0
     accept = 0
-    while len(x_acpt) < 10000:
+    while len(x_acpt) < 10_000:
         ## First choose a random x
         x = np.random.uniform(0, 1)
         u = np.random.uniform(0, proposal(x))
