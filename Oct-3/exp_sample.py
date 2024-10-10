@@ -50,8 +50,9 @@ def arc_length_ellipse(a, b, n_samples):
         minus_area = a * b * 4 * np.mean(minus_ellipse)
         ## Now compare the areas, and this should give me some length unit which is related to the arc length
         ## Now compare
-        a = (plus_area - minus_area)/(2*delta)
-        arc_length.append(a)
+        arc = (plus_area - minus_area)/(2*delta)
+        #print(arc)
+        arc_length.append(arc)
     std_arc = np.std(arc_length)
     mean_arc = np.mean(arc_length)
 
@@ -87,6 +88,6 @@ b = 5  # Semi-minor axis
 # plt.show()
 
 # 3. Monte Carlo Integration for Ellipse Circumference
-circumference_estimate = arc_length_ellipse(a, b, n_samples)
-print(f"Estimated Circumference of the Ellipse (a = {a}, b = {b}): {circumference_estimate}\n"
+mean, std = arc_length_ellipse(a, b, n_samples)
+print(f"Estimated Circumference of the Ellipse (a = {a}, b = {b}): mean:{mean}, std:{std}\n"
       f"Using Ramanujan aproximation of the circumference of the elipse: {approx(a,b)}")
