@@ -39,18 +39,26 @@ def monte_carlo_ellipse_circumference(a, b, n_samples):
     return circumference_estimate
 
 def arc_length_ellipse(a, b, n_samples):
-    delta = 0.0001
-    x = np.random.uniform(-a, a, n_samples)
-    y = np.random.uniform(-b, b, n_samples)
-    plus_ellipse = (x/(a+delta))**2 + (y/(b+delta))**2 < 1
-    plus_area = a * b * 4 * np.mean(plus_ellipse)
-    minus_ellipse = (x/(a-delta))**2 + (y/(b-delta))**2 < 1
-    minus_area = a * b * 4 * np.mean(minus_ellipse)
-    ## Now compare the areas, and this should give me some length unit which is related to the arc length
-    ## Now compare
-    a = (plus_area - minus_area)/(2*delta)
-    return a
+    arc_length = []
+    for i in range(n_samples):
+        delta = 0.0001
+        x = np.random.uniform(-a, a, n_samples)
+        y = np.random.uniform(-b, b, n_samples)
+        plus_ellipse = (x/(a+delta))**2 + (y/(b+delta))**2 < 1
+        plus_area = a * b * 4 * np.mean(plus_ellipse)
+        minus_ellipse = (x/(a-delta))**2 + (y/(b-delta))**2 < 1
+        minus_area = a * b * 4 * np.mean(minus_ellipse)
+        ## Now compare the areas, and this should give me some length unit which is related to the arc length
+        ## Now compare
+        a = (plus_area - minus_area)/(2*delta)
+        arc_length.append(a)
+    std_arc = np.std(arc_length)
+    mean_arc = np.mean(arc_length)
+
+    return mean_arc, std_arc
+
 ## This is the best aproximation to the arc length of an ellipse
+
 def approx(a, b):
     t = ((a-b)/(a+b))**2
     return np.pi*(a+b)*(1 + 3*t/(10 + np.sqrt(4 - 3*t)))
