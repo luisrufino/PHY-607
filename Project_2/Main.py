@@ -1,5 +1,5 @@
-from monte_carlo_simulation.lattice import Lattice2D
-from monte_carlo_simulation.monte_carlo import MonteCarloSimulation
+from monte_carlo_sim.Lattice import Lattice2D
+from monte_carlo_sim.MC import MonteCarloSimulation
 
 if __name__ == "__main__":
     # Create a 10x10 lattice
