@@ -1,5 +1,5 @@
-from monte_carlo_sim.Lattice import Lattice2D
-from monte_carlo_sim.MC import MonteCarloSimulation
+from monte_carlo_simulation.lattice import Lattice2D
+from monte_carlo_simulation.monte_carlo import MonteCarloSimulation
 
 if __name__ == "__main__":
     # Create a 10x10 lattice
@@ -9,14 +9,9 @@ if __name__ == "__main__":
     # Set up Monte Carlo simulation
     monte_carlo = MonteCarloSimulation(lattice)
 
-    # Example: Measure distance traveled for a particle starting at (0,0)
-    start_position = (0, 0)
-    current_position = (5, 5)  # Assume the particle moved to (5, 5)
-    distance_traveled = lattice.measure_average_distance(current_position, start_position)
-    print(f"Distance traveled from {start_position} to {current_position}: {distance_traveled}")
-
-    # Run the Metropolis-Hastings algorithm
-    monte_carlo.metropolis_hastings(5, 5)  # Run for a particle at position (5,5)
+    # Run Monte Carlo simulation for 1000 steps, updating all particles
+    for _ in range(1000):
+        monte_carlo.run_full_update()  # Update all particles at each step
 
     # Measure time to thermalization
     steps_to_thermalization = monte_carlo.time_to_thermalization()
