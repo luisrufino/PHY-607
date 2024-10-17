@@ -3,3 +3,4 @@
 from .box import Box
 from .particle import Particle
 from .mc_sim import run_simulation
+from.utils import rejection_sampling, inverse_cdf_sampling

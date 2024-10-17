@@ -1,5 +1,6 @@
 import numpy as np
 from .particle import Particle
+from .utils import rejection_sampling, inverse_cdf_sampling, velocity_pdf, sample_velocity_with_rejection
 
 
 class Box:
@@ -12,22 +13,21 @@ class Box:
         The size of the cubic box.
     particles : list
         A list of Particle objects in the box.
-    temperature : float
-        The temperature of the system (in Kelvin), which determines the strength of random forces for Brownian motion.
+    k_B : float
+        Boltzmann constant approximation for simplicity.
     """
 
-    def __init__(self, size=10.0, temperature=300.0):
+    def __init__(self, size=10.0):
         self.size = size
         self.particles = []
-        self.temperature = temperature
         self.volume = size ** 3  # Volume of the box
-        self.k_B = 1.38e-23  # Boltzmann constant
+        self.k_B = 1  # Approximation of Boltzmann constant for simplicity
 
         # Lists to store measurements over time
         self.pressure_over_time = []
         self.temperature_over_time = []
         self.energy_over_time = []
-        self.entropy_over_time = []
+
     def add_particle(self, particle):
         """
         Add a particle to the simulation box.
@@ -39,26 +39,50 @@ class Box:
         """
         self.particles.append(particle)
 
-    def apply_brownian_motion(self, particle, dt):
+    def initialize_velocities(self, temperature=None, mode="temperature"):
         """
-        Apply random forces to simulate Brownian motion.
+        Initialize particle velocities based on the chosen mode.
 
         Parameters
         ----------
-        particle : Particle
-            The particle to which Brownian motion is applied.
-        dt : float
-            The time step of the simulation.
+        temperature : float or None
+            The initial temperature for velocity distribution (used if mode is "temperature").
+        mode : str
+            The mode for velocity initialization. Options are "temperature" (Maxwell-Boltzmann), "uniform", or "rejection_sampling".
         """
-        # Boltzmann constant (J/K)
-        k_B = 1.38e-23
+        if mode == "temperature" and temperature is not None:
+            # Maxwell-Boltzmann distribution for velocity magnitude
+            for particle in self.particles:
+                velocity_magnitude = np.sqrt(3 * self.k_B * temperature / particle.mass)
+                particle.velocity = np.random.normal(0, velocity_magnitude, size=3)
+            #print(f"Initialized velocities using Maxwell-Boltzmann distribution with temperature: {temperature}")
 
-        # Standard deviation of random velocity perturbation
-        std_dev = np.sqrt(2 * k_B * self.temperature * dt / particle.mass)
+        elif mode == "uniform":
+            # Random uniform velocity distribution
+            for particle in self.particles:
+                particle.velocity = np.random.uniform(-10, 10, size=3)
+            #print(f"Initialized velocities using uniform distribution")
 
-        # Add a random velocity perturbation (Gaussian-distributed)
-        random_force = np.random.normal(0, std_dev, size=3)
-        particle.velocity += random_force
+        elif mode == "rejection_sampling":
+            # Sample velocities for each particle using rejection sampling
+            for particle in self.particles:
+                # Most probable speed (v_mp) for the Maxwell-Boltzmann distribution
+                v_mp = np.sqrt(2 * self.k_B * temperature / particle.mass)  # Most probable speed
+                #print(f"Most probable speed v_mp: {v_mp}")
+
+                # Set xmax and ymax based on v_mp and the velocity PDF at v_mp
+                xmax = 3 * v_mp  # Choose a range around 3 times the most probable speed
+                ymax = velocity_pdf(v_mp, temperature, particle.mass)  # Peak value of the PDF
+                #print(f"xmax: {xmax}, ymax: {ymax}")
+
+                # Perform rejection sampling to sample a velocity magnitude
+                sampled_velocity = sample_velocity_with_rejection(temperature, particle.mass, xmax, ymax, velocity_pdf)
+
+                # Assign the sampled velocity magnitude in a random direction
+                direction = np.random.randn(3)  # Random direction
+                direction /= np.linalg.norm(direction)  # Normalize to unit vector
+                particle.velocity = sampled_velocity * direction
+                #print(f"Sampled velocity for particle: {particle.velocity}")
 
     def handle_wall_collisions(self, particle):
         """
@@ -67,30 +91,24 @@ class Box:
         If a particle hits a wall, its velocity in the corresponding direction is reversed.
         Adjust the particle's position if it exceeds the boundary (taking its radius into account).
 
-        Returns True if a collision occurs, False otherwise.
-
         Parameters
         ----------
         particle : Particle
             The particle to check for wall collisions.
         """
-        collision = False
         for i in range(3):  # Check x, y, z directions
             if particle.position[i] - particle.radius <= 0:
+                # Particle has hit the wall in the negative direction
                 particle.position[i] = particle.radius  # Keep particle inside the box
                 particle.velocity[i] *= -1  # Reverse velocity direction
-                collision = True
             elif particle.position[i] + particle.radius >= self.size:
+                # Particle has hit the wall in the positive direction
                 particle.position[i] = self.size - particle.radius  # Keep particle inside the box
                 particle.velocity[i] *= -1  # Reverse velocity direction
-                collision = True
-        return collision  # Return whether collision occurred
 
     def handle_particle_collisions(self, particle1, particle2):
         """
-        Handle collisions between two particles using elastic collision rules.
-
-        Returns True if a collision occurs, False otherwise.
+        Handle elastic collisions between two particles.
 
         Parameters
         ----------
@@ -111,56 +129,73 @@ class Box:
 
             # Update velocities (elastic collision formula)
             particle1.velocity = v1 - (2 * m2 / (m1 + m2)) * (
-                        np.dot(vel_diff, pos_diff) / np.dot(pos_diff, pos_diff)) * pos_diff
+                np.dot(vel_diff, pos_diff) / np.dot(pos_diff, pos_diff)) * pos_diff
             particle2.velocity = v2 - (2 * m1 / (m1 + m2)) * (
-                        np.dot(-vel_diff, -pos_diff) / np.dot(pos_diff, pos_diff)) * -pos_diff
-
-            return True  # Collision occurred
-        return False  # No collision
-
-    def calculate_kinetic_energy(self):
-        return sum(0.5 * p.mass * (p.velocity) ** 2 for p in self.particles)
+                np.dot(-vel_diff, -pos_diff) / np.dot(pos_diff, pos_diff)) * -pos_diff
 
     def calculate_temperature(self):
-        avg_kinetic_energy = self.calculate_kinetic_energy() / len(self.particles)
-        return (2 / 3) * avg_kinetic_energy / self.k_B
+        """
+        Calculate the temperature of the system based on the kinetic energy of the particles.
+
+        Returns
+        -------
+        float : Temperature of the system.
+        """
+        total_kinetic_energy = sum(0.5 * p.mass * np.linalg.norm(p.velocity) ** 2 for p in self.particles)
+        avg_kinetic_energy_per_particle = total_kinetic_energy / len(self.particles)
+
+        # T = (2/3) * (avg kinetic energy) / k_B
+        return (2 / 3) * avg_kinetic_energy_per_particle / self.k_B
+
+    def calculate_kinetic_energy(self):
+        """
+        Calculate the total kinetic energy of the particles in the system.
+
+        Returns
+        -------
+        float : Total kinetic energy of the system.
+        """
+        return sum(0.5 * p.mass * np.linalg.norm(p.velocity) ** 2 for p in self.particles)
 
     def calculate_pressure(self):
-        avg_kinetic_energy = self.calculate_kinetic_energy() / len(self.particles)
-        return (2 / 3) * avg_kinetic_energy / self.volume
+        """
+        Calculate the pressure of the system based on the kinetic energy and particle density.
 
-    def calculate_entropy(self):
-        # Using velocity distribution to approximate entropy
-        velocities = np.array([np.linalg.norm(p.velocity) for p in self.particles])
-        hist, _ = np.histogram(velocities, bins=30, density=True)
-        hist = hist[hist > 0]  # Remove zero probabilities
-        return -self.k_B * np.sum(hist * np.log(hist))
+        Returns
+        -------
+        float : Pressure of the system.
+        """
+        N = len(self.particles)
+        total_kinetic_energy = self.calculate_kinetic_energy()
+        avg_kinetic_energy_per_particle = total_kinetic_energy / N
+
+        # P = (2/3) * (N/V) * (average kinetic energy)
+        return (2 / 3) * (N / self.volume) * avg_kinetic_energy_per_particle
 
     def step(self, dt):
-        collisions = [False] * len(self.particles)
+        """
+        Perform one time step of the simulation.
 
-        for particle in self.particles:
-            self.apply_brownian_motion(particle, dt)
+        Parameters
+        ----------
+        dt : float
+            The time step of the simulation.
+        """
+        for i, particle in enumerate(self.particles):
             particle.update_position(dt)
-            if self.handle_wall_collisions(particle):
-                collisions[self.particles.index(particle)] = True
+            self.handle_wall_collisions(particle)
 
+        # Check for particle-particle collisions
         for i in range(len(self.particles)):
             for j in range(i + 1, len(self.particles)):
-                if self.handle_particle_collisions(self.particles[i], self.particles[j]):
-                    collisions[i] = True
-                    collisions[j] = True
+                self.handle_particle_collisions(self.particles[i], self.particles[j])
 
         # Measure pressure, temperature, and energy
         pressure = self.calculate_pressure()
-        temperature = self.calculate_temperature()
         energy = self.calculate_kinetic_energy()
-        entropy = self.calculate_entropy()
+        temperature = self.calculate_temperature()
 
         # Store measurements over time
         self.pressure_over_time.append(pressure)
-        self.temperature_over_time.append(temperature)
         self.energy_over_time.append(energy)
-        self.entropy_over_time.append(entropy)
-
-        return collisions
+        self.temperature_over_time.append(temperature)
